@@ -58,9 +58,10 @@ fn main() -> Result<(), Error> {
         state.process_line(line?);
     }
 
-    println!("Found {} characters", state.count);
-
     let pairs = state.get_result();
+
+    println!("Found {} characters", state.count);
+    println!("Dictionaty:");    
     for (character, character_count) in pairs {
         println!("{}: {}", character, (*character_count as f64) / (state.count as f64));
     }

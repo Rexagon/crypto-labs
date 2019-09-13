@@ -1,4 +1,8 @@
 # crypto-labs
 
-## How to run
-` cargo run -p lab1 -- test/large.txt `
+### lab1
+```
+echo "Привет Странный Мир" \
+    | lab1-encrypt 12 \
+    | lab1-decrypt test/large.txt
+```

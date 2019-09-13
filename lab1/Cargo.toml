@@ -4,5 +4,13 @@ version = "0.1.0"
 authors = ["Ivan Kalinin <i.kalinin@module.ru>"]
 edition = "2018"
 
+[[bin]]
+name = "lab1-decrypt"
+path = "src/decrypt.rs"
+
+[[bin]]
+name = "lab1-encrypt"
+path = "src/encrypt.rs"
+
 [dependencies]
 hashbrown = "0.6"
