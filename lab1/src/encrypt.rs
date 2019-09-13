@@ -2,8 +2,8 @@ use std::env;
 use std::io::{Write, BufRead, Error};
 
 fn encrypt(message: String, shift: usize) -> String {
-    let alphabet_upper: &str = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦШЩЪЫЬЭЮЯ";
-    let alphabet_lower: &str = "абвгдеёжзийклмнопрстуфхцшщъыьэюя";
+    let alphabet_upper: &str = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+    let alphabet_lower: &str = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
     let alphabet_size = alphabet_upper.chars().count();
 
     let shift = shift % alphabet_size;
@@ -38,7 +38,7 @@ fn main() -> Result<(), Error> {
     let mut stdout = std::io::stdout();
 
     for line in stdin.lock().lines() {
-        stdout.write_all(encrypt(line?, shift).as_bytes()).unwrap()
+        stdout.write_all(encrypt(line?, shift).as_bytes())?;
     }
 
     stdout.flush().unwrap();
