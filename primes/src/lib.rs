@@ -1,12 +1,116 @@
-pub fn is_prime(number: &u64) -> bool {
+#[macro_use]
+extern crate lazy_static;
+
+use {
+    std::thread::Thread,
+    rand::{
+        prelude::ThreadRng,
+        distributions::{Distribution, Uniform}
+    },
+    num_bigint::{BigUint, ToBigUint},
+    lazy_static::LazyStatic
+};
+
+lazy_static! {
+static ref THREAD_COUNT: usize = usize::min(num_cpus::get(), 3) - 1;
+}
+
+pub struct Range {
+    bit_count: u64,
+    uniform: Uniform<u64>,
+}
+
+impl Range {
+    pub fn new(bit_count: u8) -> Self {
+        Range {
+            bit_count: bit_count as u64,
+            uniform: Uniform::new(0, 0x1 << bit_count),
+        }
+    }
+}
+
+
+pub fn generate(range: &Range) -> u64 {
+    let mut rng = rand::thread_rng();
+
+    loop {
+        if let Some(number) = try_generate(range, &mut rng) {
+            return number;
+        }
+    }
+}
+
+
+pub fn try_generate(range: &Range, rng: &mut ThreadRng) -> Option<u64> {
+    let number = loop {
+        if let Some(number) = try_generate_initial(range, rng) {
+            break number;
+        }
+    };
+
+    if test_number(rng, number) {
+        Some(number)
+    } else {
+        None
+    }
+}
+
+fn try_generate_initial(range: &Range, rng: &mut ThreadRng) -> Option<u64> {
+    let number = range.uniform.sample(rng) | (0x1u64 << (range.bit_count - 1)) | 0x1u64;
+
     for prime in PRIMES {
         if number % prime == 0 {
-            return false;
+            return None;
         }
+    }
+
+    Some(number)
+}
+
+
+fn test_number(rng: &mut ThreadRng, p: u64) -> bool {
+    let one: BigUint = 1.to_biguint().unwrap();
+    let two: BigUint = 2.to_biguint().unwrap();
+
+    let mut b = 1u64;
+    let mut m = p >> 1;
+    while m & 0x1u64 == 0 {
+        m >>= 1;
+        b += 1;
+    }
+
+    let range = Uniform::new(2, p - 2);
+
+    let m: BigUint = m.to_biguint().unwrap();
+    let p: BigUint = p.to_biguint().unwrap();
+    let p_minus_one = p.clone() - one.clone();
+
+    'outer: for _ in 0..5 {
+        let a: BigUint = range.sample(rng).to_biguint().unwrap();
+        let mut z = a.modpow(&m, &p);
+
+        if z.eq(&one) || z.eq(&p_minus_one) {
+            continue 'outer;
+        }
+
+        for _ in 0..b {
+            z = z.modpow(&two, &p);
+
+            if z.eq(&one) {
+                return false;
+            }
+
+            if z.eq(&p_minus_one) {
+                continue 'outer;
+            }
+        }
+
+        return false;
     }
 
     true
 }
+
 
 const PRIMES: &'static [u64] = &[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
     67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,
