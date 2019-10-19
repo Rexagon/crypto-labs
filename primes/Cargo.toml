@@ -6,8 +6,8 @@ edition = "2018"
 
 
 [dependencies]
-hashbrown = "0.6"
 num-bigint = "0.2"
 rand = "0.7"
 num_cpus = "1.0"
 lazy_static = "1.4"
+num-traits = "0.2"

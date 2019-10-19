@@ -112,6 +112,70 @@ fn test_number(rng: &mut ThreadRng, p: u64) -> bool {
 }
 
 
+pub fn primitive_root_modulo(number: u64) -> u64 {
+    use num_traits::cast::ToPrimitive;
+    use std::ops::{Add, Div};
+
+    let fact: Vec<BigUint> = factorize(number)
+        .iter()
+        .map(|v| v.to_biguint().unwrap())
+        .collect();
+
+    let fact_count = fact.len();
+
+    let one = 1.to_biguint().unwrap();
+
+    let phi: BigUint = (number - 1).to_biguint().unwrap();
+    let number: BigUint = number.to_biguint().unwrap();
+
+    let mut result: BigUint = 2.to_biguint().unwrap();
+    while result.lt(&number) {
+        let mut valid = true;
+
+        let mut i = 0;
+        while i < fact_count && valid {
+            valid &= result.modpow(&phi.clone().div(&fact[i]), &number).ne(&one);
+
+            i += 1;
+        }
+
+        if valid {
+            return result.to_u64().unwrap();
+        }
+
+        result = result.clone().add(&one);
+    }
+
+    unreachable!();
+}
+
+
+fn factorize(number: u64) -> Vec<u64> {
+    let mut result= Vec::new();
+
+    let mut n = number - 1;
+
+    let mut i = 2;
+    while i * i <= n {
+        if n % i == 0 {
+            result.push(i);
+
+            while n % i == 0 {
+                n /= i;
+            }
+        }
+
+        i += 1;
+    }
+
+    if n > 1 {
+        result.push(n);
+    }
+
+    result
+}
+
+
 const PRIMES: &'static [u64] = &[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
     67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,
     167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269,
