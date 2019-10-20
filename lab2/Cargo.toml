@@ -4,10 +4,6 @@ version = "0.1.0"
 authors = ["Rexagon <reide740@gmail.com>"]
 edition = "2018"
 
-[[bin]]
-name = "lab2"
-path = "src/main.rs"
-
 [dependencies]
-primes = { path="../primes" }
+primes = { path = "../primes" }
 num-bigint = "0.2"
