@@ -2,6 +2,7 @@ use {
     num_bigint::{BigUint, ToBigUint},
     num_traits::cast::ToPrimitive
 };
+use num_traits::Zero;
 
 
 pub fn primitive_root_modulo(number: u64) -> u64 {
@@ -41,30 +42,24 @@ pub fn primitive_root_modulo(number: u64) -> u64 {
 }
 
 
-pub fn least_common_multiple(a: u64, b: u64) -> BigUint {
-    if a == 0 || b == 0 {
+pub fn least_common_multiple(a: BigUint, b: BigUint) -> BigUint {
+    if a.is_zero() || b.is_zero() {
         return 0.to_biguint().unwrap();
     }
 
-    let g = greatest_common_divisor(a, b).to_biguint().unwrap();
-
-    let a = a.to_biguint().unwrap();
-    let b = b.to_biguint().unwrap();
-
-    return a * b / g;
+    let g = greatest_common_divisor(a, b);
+    return &a * &b / g;
 }
 
 
-pub fn greatest_common_divisor(mut a: u64, mut b: u64) -> u64 {
-    assert!(a != 0 && b != 0);
-
+pub fn greatest_common_divisor(mut a: BigUint, mut b: BigUint) -> BigUint {
     let mut remainder;
     loop {
         remainder = a % b;
-        a = b;
+        a = b.clone();
         b = remainder;
 
-        if b == 0 {
+        if b.is_zero() {
             break a;
         }
     }
