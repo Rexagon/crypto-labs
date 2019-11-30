@@ -1,37 +1,18 @@
-use num_bigint::{BigUint, ToBigUint};
+mod rsa;
 
-use primes::generation::{generate_prime, Range};
-use primes::math::{least_common_multiple, greatest_common_divisor};
+use num_bigint::BigUint;
 
 fn main() {
-    let p = generate_prime(&Range::new(40)).to_biguint();
-    let q = generate_prime(&Range::new(45)).to_biguint();
+    let e = BigUint::from(65537u64);
 
-    let lambda = least_common_multiple(p - 1, q - 1);
+    let (public_key, private_key) = rsa::generate_keys(&e).unwrap();
 
-    let e = 65537.to_biguint().unwrap();
+    let test_number = BigUint::from(123456u64);
+    println!("Origin: {}", &test_number);
 
-    let p = p.to_biguint().unwrap();
-    let q = q.to_biguint().unwrap();
+    let encrypted = rsa::encrypt(&test_number, &public_key);
+    println!("Encrypted: {}", &encrypted);
 
-    let n = p * q;
-
-    println!("{}", greatest_common_divisor(e, lambda));
-
-    //let d = mod_inverse(e, lambda);
+    let decrypted = rsa::decrypt(&encrypted, &private_key);
+    println!("Decrypted: {}", &decrypted);
 }
-
-/*
-fn mod_inverse(a: BigUint, m: BigUint) -> Option<BigUint> {
-    let g = greatest_common_divisor(a, m);
-
-    if g != 1 {
-        None
-    } else {
-        // If a and m are relatively prime, then modulo inverse
-        // is a^(m-2) mode m
-        cout << "Modular multiplicative inverse is "
-            << power(a, m - 2, m);
-    }
-}
-*/

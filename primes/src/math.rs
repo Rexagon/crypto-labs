@@ -1,12 +1,9 @@
 use {
     num_bigint::{BigUint, ToBigUint},
-    num_traits::cast::ToPrimitive
+    num_traits::cast::ToPrimitive,
 };
-use num_traits::Zero;
-
 
 pub fn primitive_root_modulo(number: u64) -> u64 {
-
     let fact: Vec<BigUint> = factorize(number)
         .iter()
         .map(|v| v.to_biguint().unwrap())
@@ -41,33 +38,8 @@ pub fn primitive_root_modulo(number: u64) -> u64 {
     unreachable!();
 }
 
-
-pub fn least_common_multiple(a: BigUint, b: BigUint) -> BigUint {
-    if a.is_zero() || b.is_zero() {
-        return 0.to_biguint().unwrap();
-    }
-
-    let g = greatest_common_divisor(a, b);
-    return &a * &b / g;
-}
-
-
-pub fn greatest_common_divisor(mut a: BigUint, mut b: BigUint) -> BigUint {
-    let mut remainder;
-    loop {
-        remainder = a % b;
-        a = b.clone();
-        b = remainder;
-
-        if b.is_zero() {
-            break a;
-        }
-    }
-}
-
-
 fn factorize(number: u64) -> Vec<u64> {
-    let mut result= Vec::new();
+    let mut result = Vec::new();
 
     let mut n = number - 1;
 
@@ -90,5 +62,3 @@ fn factorize(number: u64) -> Vec<u64> {
 
     result
 }
-
-
