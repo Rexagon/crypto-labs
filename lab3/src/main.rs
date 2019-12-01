@@ -5,7 +5,7 @@ use num_bigint::BigUint;
 fn main() {
     let e = BigUint::from(65537u64);
 
-    let (public_key, private_key) = rsa::generate_keys(&e).unwrap();
+    let (public_key, private_key) = rsa::generate_keys(&e);
 
     let test_number = BigUint::from(123456u64);
     println!("Origin: {}", &test_number);

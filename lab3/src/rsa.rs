@@ -1,4 +1,4 @@
-use num_bigint::{BigInt, BigUint, ToBigInt, ToBigUint};
+use num_bigint::{BigInt, BigUint, ToBigInt};
 
 use num_traits::{One, Zero};
 use primes::generation::{generate_prime, Range};
@@ -21,9 +21,9 @@ pub fn decrypt(data: &BigUint, key: &PrivateKey) -> BigUint {
     data.modpow(&key.d, &key.n)
 }
 
-pub fn generate_keys(e: &BigUint) -> Option<(PublicKey, PrivateKey)> {
-    let p = generate_prime(&Range::new(60)).to_biguint()?;
-    let q = generate_prime(&Range::new(78)).to_biguint()?;
+pub fn generate_keys(e: &BigUint) -> (PublicKey, PrivateKey) {
+    let p = generate_prime(&Range::new(1024));
+    let q = generate_prime(&Range::new(1024));
 
     let n = &p * &q;
     let phi = (&p - BigUint::one()) * (&q - BigUint::one());
@@ -40,7 +40,7 @@ pub fn generate_keys(e: &BigUint) -> Option<(PublicKey, PrivateKey)> {
     println!("public key: ({}, {})", &public_key.n, &public_key.e);
     println!("private key: ({}, {})", &private_key.n, &private_key.d);
 
-    Some((public_key, private_key))
+    (public_key, private_key)
 }
 
 fn generate_private_key(phi: &BigUint, e: &BigUint) -> BigUint {
