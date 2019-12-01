@@ -1,62 +1,58 @@
 use {
-    num_bigint::{BigUint, ToBigUint},
-    num_traits::cast::ToPrimitive,
+    num_bigint::BigUint,
+    num_traits::{One, Zero},
 };
 
-pub fn primitive_root_modulo(number: u64) -> u64 {
-    let fact: Vec<BigUint> = factorize(number)
-        .iter()
-        .map(|v| v.to_biguint().unwrap())
-        .collect();
+pub fn primitive_root_modulo(number: &BigUint) -> BigUint {
+    let fact: Vec<BigUint> = factorize(number);
 
-    let fact_count = fact.len();
+    let phi: BigUint = number - BigUint::one();
 
-    let one = 1.to_biguint().unwrap();
-
-    let phi: BigUint = (number - 1).to_biguint().unwrap();
-    let number: BigUint = number.to_biguint().unwrap();
-
-    let mut result: BigUint = 2.to_biguint().unwrap();
-    while result < number {
+    let mut result: BigUint = BigUint::from(2u64);
+    while &result < number {
         let mut valid = true;
 
         let mut i = 0;
-        while i < fact_count && valid {
+        while i < fact.len() && valid {
             let exponent = &phi / &fact[i];
-            valid &= result.modpow(&exponent, &number) != one;
+            valid &= result.modpow(&exponent, &number) != BigUint::one();
 
             i += 1;
         }
 
         if valid {
-            return result.to_u64().unwrap();
+            return result;
         }
 
-        result += &one;
+        result += BigUint::one();
     }
 
     unreachable!();
 }
 
-fn factorize(number: u64) -> Vec<u64> {
+fn factorize(number: &BigUint) -> Vec<BigUint> {
     let mut result = Vec::new();
 
-    let mut n = number - 1;
+    let mut n = number - BigUint::one();
 
-    let mut i = 2;
-    while i * i <= n {
-        if n % i == 0 {
-            result.push(i);
+    let mut i = BigUint::from(2u64);
+    while &i * &i <= n {
+        if (&n % &i).is_zero() {
+            result.push(i.clone());
 
-            while n % i == 0 {
-                n /= i;
+            loop {
+                n /= &i;
+
+                if (&n % &i).is_zero() {
+                    break;
+                }
             }
         }
 
-        i += 1;
+        i += BigUint::one();
     }
 
-    if n > 1 {
+    if n > BigUint::one() {
         result.push(n);
     }
 

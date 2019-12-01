@@ -22,8 +22,8 @@ pub fn decrypt(data: &BigUint, key: &PrivateKey) -> BigUint {
 }
 
 pub fn generate_keys(e: &BigUint) -> Option<(PublicKey, PrivateKey)> {
-    let p = generate_prime(&Range::new(40)).to_biguint()?;
-    let q = generate_prime(&Range::new(45)).to_biguint()?;
+    let p = generate_prime(&Range::new(60)).to_biguint()?;
+    let q = generate_prime(&Range::new(78)).to_biguint()?;
 
     let n = &p * &q;
     let phi = (&p - BigUint::one()) * (&q - BigUint::one());
@@ -36,6 +36,9 @@ pub fn generate_keys(e: &BigUint) -> Option<(PublicKey, PrivateKey)> {
     };
 
     let private_key = PrivateKey { n, d };
+
+    println!("public key: ({}, {})", &public_key.n, &public_key.e);
+    println!("private key: ({}, {})", &private_key.n, &private_key.d);
 
     Some((public_key, private_key))
 }

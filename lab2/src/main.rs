@@ -1,6 +1,6 @@
 use num_bigint::{BigUint, ToBigUint};
 
-use primes::generation::{Range, generate_prime};
+use primes::generation::{generate_prime, Range};
 use primes::math::primitive_root_modulo;
 
 fn main() {
@@ -45,9 +45,11 @@ fn main() {
     println!("\nKa equals Kb is {:?}", alice_key.eq(&bob_key));
 }
 
-
 fn generate_initial_values(range: &Range) -> (BigUint, BigUint) {
     let p = generate_prime(&range);
 
-    (p.to_biguint().unwrap(), primitive_root_modulo(p).to_biguint().unwrap())
+    (
+        p.to_biguint().unwrap(),
+        primitive_root_modulo(&p.to_biguint().unwrap()),
+    )
 }
