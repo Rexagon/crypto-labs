@@ -1,7 +1,10 @@
-use num_bigint::{BigInt, BigUint, ToBigInt};
+use {
+    num_bigint::{BigInt, BigUint, ToBigInt},
+    num_traits::{One, Zero},
+    rand::Rng,
+};
 
-use num_traits::{One, Zero};
-use primes::generation::{generate_prime, Range};
+use primes::{PrimeGenerator, Range};
 
 pub struct PublicKey {
     pub n: BigUint,
@@ -21,9 +24,9 @@ pub fn decrypt(data: &BigUint, key: &PrivateKey) -> BigUint {
     data.modpow(&key.d, &key.n)
 }
 
-pub fn generate_keys(e: &BigUint) -> (PublicKey, PrivateKey) {
-    let p = generate_prime(&Range::new(1024));
-    let q = generate_prime(&Range::new(1024));
+pub fn generate_keys<R: Rng + ?Sized>(e: &BigUint, rng: &mut R) -> (PublicKey, PrivateKey) {
+    let p = Range::new(1024).generate_prime(rng);
+    let q = Range::new(1024).generate_prime(rng);
 
     let n = &p * &q;
     let phi = (&p - BigUint::one()) * (&q - BigUint::one());
@@ -36,9 +39,6 @@ pub fn generate_keys(e: &BigUint) -> (PublicKey, PrivateKey) {
     };
 
     let private_key = PrivateKey { n, d };
-
-    println!("public key: ({}, {})", &public_key.n, &public_key.e);
-    println!("private key: ({}, {})", &private_key.n, &private_key.d);
 
     (public_key, private_key)
 }

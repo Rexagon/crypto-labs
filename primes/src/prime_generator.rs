@@ -1,10 +1,73 @@
 use {
     num_bigint::{BigUint, UniformBigUint},
     num_traits::{One, Zero},
-    rand::{distributions::uniform::UniformSampler, prelude::ThreadRng},
+    rand::{distributions::uniform::UniformSampler, prelude::Rng},
 };
 
-pub fn simple_test(number: &BigUint) -> bool {
+use crate::range::Range;
+
+pub trait PrimeGenerator {
+    fn generate_prime<R: Rng + ?Sized>(&self, rng: &mut R) -> BigUint;
+
+    fn generate_safe_prime<R: Rng + ?Sized>(&self, rng: &mut R) -> BigUint;
+}
+
+impl PrimeGenerator for Range {
+    fn generate_prime<R: Rng + ?Sized>(&self, rng: &mut R) -> BigUint {
+        loop {
+            if let Some(number) = try_generate_prime(self, rng) {
+                return number;
+            }
+        }
+    }
+
+    fn generate_safe_prime<R: Rng + ?Sized>(&self, rng: &mut R) -> BigUint {
+        loop {
+            if let Some(number) = try_generate_safe_prime(self, rng) {
+                return number;
+            }
+        }
+    }
+}
+
+fn try_generate_prime<R: Rng + ?Sized>(range: &Range, rng: &mut R) -> Option<BigUint> {
+    let number = loop {
+        let number = generate_initial(range, rng);
+
+        if simple_test(&number) {
+            break number;
+        }
+    };
+
+    if miller_rabin_test(&number, rng) {
+        Some(number)
+    } else {
+        None
+    }
+}
+
+fn try_generate_safe_prime<R: Rng + ?Sized>(range: &Range, rng: &mut R) -> Option<BigUint> {
+    let (number, low_number) = loop {
+        let number = generate_initial(range, rng);
+        let low_number = (&number - BigUint::one()) >> 1;
+
+        if simple_test(&number) && simple_test(&low_number) {
+            break (number, low_number);
+        }
+    };
+
+    if miller_rabin_test(&number, rng) && miller_rabin_test(&low_number, rng) {
+        Some(number)
+    } else {
+        None
+    }
+}
+
+fn generate_initial<R: Rng + ?Sized>(range: &Range, rng: &mut R) -> BigUint {
+    range.uniform.sample(rng) | &(BigUint::one() << (range.bit_count - 1)) | &BigUint::one()
+}
+
+fn simple_test(number: &BigUint) -> bool {
     for prime in PRIMES.iter() {
         if (number % prime).is_zero() {
             return false;
@@ -14,7 +77,7 @@ pub fn simple_test(number: &BigUint) -> bool {
     true
 }
 
-pub fn miller_rabin_test(p: &BigUint, rng: &mut ThreadRng) -> bool {
+fn miller_rabin_test<R: Rng + ?Sized>(p: &BigUint, rng: &mut R) -> bool {
     let one: BigUint = BigUint::one();
     let two: BigUint = BigUint::from(2u64);
 
