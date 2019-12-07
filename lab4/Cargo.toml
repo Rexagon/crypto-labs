@@ -1,0 +1,12 @@
+[package]
+name = "lab4"
+version = "0.1.0"
+authors = ["Rexagon <reide740@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+primes = { path = "../primes" }
+num-bigint = "0.2"
+num-traits = "0.2"
+rand = "0.5"
+sha2 = "0.8"
