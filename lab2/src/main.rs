@@ -1,8 +1,3 @@
-use {
-    num_bigint::{BigUint, ToBigUint},
-    rand::Rng,
-};
-
 use primes::{math, PrimeGenerator, Range};
 
 fn main() {
@@ -10,16 +5,17 @@ fn main() {
     let range = Range::new(40);
 
     // Secret numbers
-    let alice_number = range.generate_prime(&mut rng).to_biguint().unwrap();
+    let alice_number = range.generate_prime(&mut rng);
     println!("Alice number... {}", alice_number);
 
-    let bob_number = range.generate_prime(&mut rng).to_biguint().unwrap();
+    let bob_number = range.generate_prime(&mut rng);
     println!("Bob number..... {}", bob_number);
 
     //
     println!("\nAlice sending values:");
 
-    let (p, g) = generate_initial_values(&range, &mut rng);
+    let p = range.generate_prime(&mut rng);
+    let g = math::primitive_root_modulo(&p);
     println!("p: {}", p);
     println!("g: {}", g);
 
@@ -46,13 +42,4 @@ fn main() {
 
     //
     println!("\nKa equals Kb is {:?}", alice_key.eq(&bob_key));
-}
-
-fn generate_initial_values<R: Rng + ?Sized>(range: &Range, rng: &mut R) -> (BigUint, BigUint) {
-    let p = range.generate_prime(rng);
-
-    (
-        p.to_biguint().unwrap(),
-        math::primitive_root_modulo(&p.to_biguint().unwrap()),
-    )
 }
