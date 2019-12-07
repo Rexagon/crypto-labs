@@ -1,45 +1,64 @@
+use {num_bigint::BigUint, rand::Rng};
+
 use primes::{math, PrimeGenerator, Range};
 
 fn main() {
     let mut rng = rand::thread_rng();
     let range = Range::new(40);
 
-    // Secret numbers
-    let alice_number = range.generate_prime(&mut rng);
-    println!("Alice number... {}", alice_number);
-
-    let bob_number = range.generate_prime(&mut rng);
-    println!("Bob number..... {}", bob_number);
-
-    //
-    println!("\nAlice sending values:");
+    // Alice side
+    println!("Alice calculates values:");
 
     let p = range.generate_prime(&mut rng);
     let g = math::primitive_root_modulo(&p);
     println!("p: {}", p);
     println!("g: {}", g);
 
-    let alice_intermediate = g.modpow(&alice_number, &p);
-    println!("A: {}", alice_intermediate);
+    let alice = Side::new(&p, &g, &range, &mut rng);
+    println!("A: {}", &alice.secret_number);
+    println!("a: {}", &alice.intermediate);
 
-    //
-    println!("\nBob sending values:");
+    // Transmission
+    println!("\n---Alice sending values (p, g, a) to Bob---\n");
 
-    let bob_intermediate = g.modpow(&bob_number, &p);
-    println!("B: {}", bob_intermediate);
+    // Bob side
+    println!("Bob calculates values:");
 
-    //
-    println!("\nAlice calculates key:");
+    let bob = Side::new(&p, &g, &range, &mut rng);
+    println!("B: {}", &bob.secret_number);
+    println!("b: {}", &bob.intermediate);
 
-    let alice_key = bob_intermediate.modpow(&alice_number, &p);
-    println!("Ka: {}", alice_key);
+    // Transmission
+    println!("\n---Bob sending values (b) to Alice---\n");
 
-    //
-    println!("\nBob calculates key:");
+    // Alice side
+    let alice_key = alice.complete(&bob.intermediate);
+    println!("Alice calculates key: {}", &alice_key);
 
-    let bob_key = alice_intermediate.modpow(&bob_number, &p);
-    println!("Kb: {}", bob_key);
+    // Bob side
+    let bob_key = bob.complete(&alice.intermediate);
+    println!("Bob calculates key: {}", &bob_key);
+}
 
-    //
-    println!("\nKa equals Kb is {:?}", alice_key.eq(&bob_key));
+struct Side {
+    p: BigUint,
+    secret_number: BigUint,
+    intermediate: BigUint,
+}
+
+impl Side {
+    fn new<R: Rng + ?Sized>(p: &BigUint, g: &BigUint, range: &Range, rng: &mut R) -> Self {
+        let secret_number = range.generate_prime(rng);
+        let intermediate = g.modpow(&secret_number, &p);
+
+        Side {
+            p: p.clone(),
+            secret_number,
+            intermediate,
+        }
+    }
+
+    fn complete(&self, intermediate: &BigUint) -> BigUint {
+        intermediate.modpow(&self.secret_number, &self.p)
+    }
 }
