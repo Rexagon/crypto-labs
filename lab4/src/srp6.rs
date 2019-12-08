@@ -28,9 +28,8 @@ pub fn create_server_ephemeral_value<R: Rng + ?Sized>(
 ) -> (BigUint, BigUint) {
     let b = Range::new(EPHEMERAL_VALUE_SIZE).generate_mod(&security_base.large_prime, rng);
 
-    let ephemeral_value = (&security_base.k * &authentication_data.password_verifier
-        + security_base.modpow(&b))
-        % &security_base.large_prime;
+    let ephemeral_value =
+        &security_base.k * &authentication_data.password_verifier + security_base.modpow(&b);
 
     (b, ephemeral_value)
 }
