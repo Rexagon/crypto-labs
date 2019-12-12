@@ -4,7 +4,7 @@
 ```shell script
 cargo build -p lab1 --release
 
-head -c10000 test/large.txt \
+head -c200000 lab1/texts/large.txt \
     | target/release/lab1-encrypt 12 \
     | target/release/lab1-decrypt lab1/texts/large.txt
 ```

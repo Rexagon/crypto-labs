@@ -1,5 +1,4 @@
-use std::env;
-use std::io::{Write, BufRead, Error};
+use std::io::{BufRead, Error, Write};
 
 fn encrypt(message: String, shift: usize) -> String {
     let alphabet_upper: &str = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
@@ -9,20 +8,24 @@ fn encrypt(message: String, shift: usize) -> String {
     let shift = shift % alphabet_size;
     let transform = |c: &char, alphabet: &str| {
         let position = alphabet.chars().position(|v| v == *c).unwrap();
-        alphabet.chars().nth((position + shift) % alphabet_size).unwrap()
+        alphabet
+            .chars()
+            .nth((position + shift) % alphabet_size)
+            .unwrap()
     };
 
-    message.chars().map(|c| {
-        match c {
+    message
+        .chars()
+        .map(|c| match c {
             'А'..='Я' | 'Ё' => transform(&c, alphabet_upper),
             'а'..='я' | 'ё' => transform(&c, alphabet_lower),
-            _ => c
-        }
-    }).collect()
+            _ => c,
+        })
+        .collect()
 }
 
 fn read_shift(default: usize) -> usize {
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
 
     if args.len() < 2 {
         return default; // default shift
