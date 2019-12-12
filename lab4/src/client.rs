@@ -1,4 +1,3 @@
-mod security_base;
 mod server;
 mod srp6;
 

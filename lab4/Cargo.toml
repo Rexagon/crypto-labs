@@ -4,9 +4,26 @@ version = "0.1.0"
 authors = ["Rexagon <reide740@gmail.com>"]
 edition = "2018"
 
+[lib]
+name = "lab4"
+path = "src/lib.rs"
+
+[[bin]]
+name = "lab4-generator"
+path = "src/generator.rs"
+
+[[bin]]
+name = "lab4-server"
+path = "src/server.rs"
+
+#[[bin]]
+#name = "lab4-client"
+#path = "src/client.rs"
+
 [dependencies]
 primes = { path = "../primes" }
 num-bigint = "0.2"
 num-traits = "0.2"
 rand = "0.5"
 sha2 = "0.8"
+base64 = "0.11"

@@ -2,7 +2,9 @@ use {num_bigint::BigUint, rand::Rng, std::collections::HashMap};
 
 use primes::{ModuloGenerator, Range};
 
-use crate::security_base::{self, SecurityBase};
+use lab4::srp6::security_base::{self, SecurityBase};
+
+fn main() {}
 
 pub struct Server<'a> {
     users: HashMap<String, AuthenticationData>,

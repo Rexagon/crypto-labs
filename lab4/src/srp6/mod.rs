@@ -1,3 +1,7 @@
+pub mod security_base;
+
+pub use security_base::*;
+
 use {
     num_bigint::{BigInt, BigUint, ToBigInt},
     num_traits::Zero,
@@ -5,11 +9,6 @@ use {
 };
 
 use primes::{ModuloGenerator, Range};
-
-use crate::{
-    security_base::{self, SecurityBase},
-    server::AuthenticationData,
-};
 
 pub fn create_client_ephemeral_value<R: Rng + ?Sized>(
     security_base: &SecurityBase,
@@ -22,14 +21,13 @@ pub fn create_client_ephemeral_value<R: Rng + ?Sized>(
 }
 
 pub fn create_server_ephemeral_value<R: Rng + ?Sized>(
-    authentication_data: &AuthenticationData,
+    password_verifier: &BigUint,
     security_base: &SecurityBase,
     rng: &mut R,
 ) -> (BigUint, BigUint) {
     let b = Range::new(EPHEMERAL_VALUE_SIZE).generate_mod(&security_base.large_prime, rng);
 
-    let ephemeral_value =
-        &security_base.k * &authentication_data.password_verifier + security_base.modpow(&b);
+    let ephemeral_value = &security_base.k * password_verifier + security_base.modpow(&b);
 
     (b, ephemeral_value)
 }
@@ -75,7 +73,7 @@ pub fn create_client_session_key(
 }
 
 pub fn create_server_session_key(
-    authentication_data: &AuthenticationData,
+    password_verifier: &BigUint,
     client_ephemeral_value: &BigUint,
     server_ephemeral_value: (&BigUint, &BigUint),
     security_base: &SecurityBase,
@@ -87,7 +85,7 @@ pub fn create_server_session_key(
         server_ephemeral_value.1.to_string(),
     ]);
 
-    let s = (client_ephemeral_value * &authentication_data.password_verifier.modpow(&u, n))
+    let s = (client_ephemeral_value * &password_verifier.modpow(&u, n))
         .modpow(server_ephemeral_value.0, n);
 
     let k = security_base::hash(&[s.to_string()]);
