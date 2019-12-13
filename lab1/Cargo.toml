@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Rexagon <reide740@gmail.com>"]
 edition = "2018"
 
+[lib]
+name = "lab1"
+path = "src/lib.rs"
+
 [[bin]]
 name = "lab1-decrypt"
 path = "src/decrypt.rs"
