@@ -1,4 +1,5 @@
-mod bigram;
+pub mod parser;
+pub mod stuff;
 
 use {
     hashbrown::HashMap,
@@ -8,7 +9,10 @@ use {
     },
 };
 
-use crate::bigram::{Bigram, Bigrams};
+pub use crate::{
+    parser::{Bigram, Parser, ParsingItem},
+    stuff::*,
+};
 
 pub fn encrypt(message: String, shift: usize) -> String {
     let alphabet_upper: &str = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
@@ -34,18 +38,11 @@ pub fn encrypt(message: String, shift: usize) -> String {
         .collect()
 }
 
-pub fn create_mapping<T: Copy>(
-    reference_alphabet: &Vec<T>,
-    target_alphabet: &Vec<T>,
-) -> Vec<(T, T)> {
-    target_alphabet
-        .iter()
-        .zip(reference_alphabet.iter())
-        .map(|(c, r)| (*c, *r))
-        .collect()
-}
-
-pub fn create_alphabet_from_file(path: &str) -> Result<Vec<char>, Error> {
+pub fn create_alphabet_from_file<T>(path: &str) -> Result<Vec<T>, Error>
+where
+    T: Copy,
+    HashMap<T, u64>: SymbolTable,
+{
     let mut table = HashMap::new();
 
     let file = File::open(path)?;
@@ -57,25 +54,28 @@ pub fn create_alphabet_from_file(path: &str) -> Result<Vec<char>, Error> {
         }
     }
 
-    Ok(table.generate_alphabet())
+    Ok(convert_rates(&table))
 }
 
-pub fn create_alphabet_from_string(string: &str) -> Vec<char> {
+pub fn create_alphabet_from_string<T>(string: &str) -> Vec<T>
+where
+    T: Copy,
+    HashMap<T, u64>: SymbolTable,
+{
     let mut table = HashMap::new();
 
     for line in string.lines() {
         table.process_line(&line.to_lowercase());
     }
 
-    table.generate_alphabet()
+    convert_rates(&table)
 }
 
-trait SymbolTable<T> {
+pub trait SymbolTable {
     fn process_line(&mut self, line: &str);
-    fn generate_alphabet(&self) -> Vec<T>;
 }
 
-impl SymbolTable<char> for HashMap<char, u64> {
+impl SymbolTable for HashMap<char, u64> {
     fn process_line(&mut self, line: &str) {
         for c in line.chars() {
             match c {
@@ -91,19 +91,16 @@ impl SymbolTable<char> for HashMap<char, u64> {
             }
         }
     }
-
-    fn generate_alphabet(&self) -> Vec<char> {
-        let mut rates = self.iter().map(|(c, r)| (*c, *r)).collect::<Vec<_>>();
-
-        rates.sort_by(|(_, l), (_, r)| l.cmp(r).reverse());
-
-        rates.iter().map(|(c, _)| *c).collect()
-    }
 }
 
-impl SymbolTable<Bigram> for HashMap<Bigram, u64> {
+impl SymbolTable for HashMap<Bigram, u64> {
     fn process_line(&mut self, line: &str) {
-        for bigram in Bigrams::new(line) {
+        for item in Parser::new(line) {
+            let bigram = match item {
+                ParsingItem::Parsed(bigram) => bigram,
+                _ => continue,
+            };
+
             match self.get_mut(&bigram) {
                 Some(count) => {
                     *count += 1;
@@ -114,8 +111,10 @@ impl SymbolTable<Bigram> for HashMap<Bigram, u64> {
             }
         }
     }
+}
 
-    fn generate_alphabet(&self) -> Vec<Bigram> {
-        unimplemented!()
-    }
+fn convert_rates<T: Copy>(table: &HashMap<T, u64>) -> Vec<T> {
+    let mut rates = table.iter().map(|(c, r)| (*c, *r)).collect::<Vec<_>>();
+    rates.sort_by(|(_, l), (_, r)| l.cmp(r).reverse());
+    rates.iter().map(|(c, _)| *c).collect()
 }

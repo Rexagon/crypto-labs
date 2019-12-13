@@ -13,6 +13,10 @@ name = "lab1-decrypt"
 path = "src/decrypt.rs"
 
 [[bin]]
+name = "lab1-decrypt-bigrams"
+path = "src/decrypt_bigrams.rs"
+
+[[bin]]
 name = "lab1-encrypt"
 path = "src/encrypt.rs"
 
