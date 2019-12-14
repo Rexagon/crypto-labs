@@ -77,8 +77,8 @@ fn generate_private_key(phi: &BigUint, e: &BigUint) -> BigUint {
 
         if current_row.d.is_one() {
             let result = match current_row.b {
-                b if &b > &phi => b % phi,
-                b if &b < &BigInt::zero() => b + phi,
+                ref b if b > &phi => b % &phi,
+                ref b if b < &BigInt::zero() => b + phi,
                 b => b,
             };
 

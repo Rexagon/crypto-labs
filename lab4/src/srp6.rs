@@ -63,7 +63,7 @@ pub fn create_client_session_key(
         .modpow(&signed_exponent, &signed_n);
 
     let s = (match s {
-        s if s.lt(&BigInt::zero()) => s + signed_n,
+        ref s if s.lt(&BigInt::zero()) => s + signed_n,
         s => s,
     })
     .to_biguint()
