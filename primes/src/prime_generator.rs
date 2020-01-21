@@ -264,3 +264,18 @@ lazy_static! {
     .map(|value| BigUint::from(*value))
     .collect::<Vec<BigUint>>();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn large_prime_generation() {
+        let mut rng = rand::thread_rng();
+        let range = Range::new(1024);
+
+        let prime = range.generate_prime(&mut rng);
+
+        println!("{}", prime);
+    }
+}

@@ -4,7 +4,7 @@ use primes::{math, PrimeGenerator, Range};
 
 fn main() {
     let mut rng = rand::thread_rng();
-    let range = Range::new(40);
+    let range = Range::new(50);
 
     // Alice side
     println!("Alice calculates values:");
